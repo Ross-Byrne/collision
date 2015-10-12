@@ -22,17 +22,15 @@
 		 
 		 // Objects
 		 
-		 var circle = {
+		 var ball = {
 			 
-		 	radius: 10
+		 	radius: 0
 		 	,position: { x: 0, y: 0 }
+			,velocity: { x: 0, y: 0 }
+			,acceleration: 0
 			 
-			 // function to draw circle to specified x, y pos
-			,draw: function(xPos, yPos) {
-			 
-				// set x and y
-				this.position.x = xPos;
-				this.position.y = yPos;
+			 // function to draw ball
+			,draw: function() {
 			 
 				// Make the fill style red.
       		ctx.fillStyle = "rgb(255, 0, 0)";
@@ -47,30 +45,168 @@
 			 
 		 	} // draw()
 		 
-		 }; // circle object
+		 }; // ball object
 		 
-		 // initialise vars
+		 // Constructor for blue rectangle
+		 function Rectangle(){
+			 
+			 this.position = {x: 50, y: 50};
+			 this.width = 40;
+			 this.height = 20;
+			 this.isAlive = true;
+			 
+			 this.draw = function(){
+				 
+			 	if(this.isAlive){
+					 
+				 // set colour for square
+				 ctx.fillStyle = "rgb(0, 0, 255)";
+
+				 // draw
+				 ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+			 	} // if
+				 
+			 }; // draw()
+		 };
 		 
-		 var count = 0;
 		 
-		 circle.radius = 10;
+		 // Gets a handle to the element with id canvasOne.
+		 var canvas = document.getElementById("canvas");
+		 
+		 // Get a 2D context for the canvas.
+		 var ctx = canvas.getContext("2d");
+		 
+		 // Creating new rectangle object
+		 var blueRect = new Rectangle();
 		 
 		 
 		 ///////////////////////////// Functions  /////////////////////////////////////
 		 
-		 function init(){
+		 function main(){
 			 
-			 // Gets a handle to the element with id canvasOne.
-			 var canvas = document.getElementById("canvas");
-		 
-			 // Get a 2D context for the canvas.
-			 var ctx = canvas.getContext("2d");
+			 // initialise canvas
+			 init();
+			 
+			 // get the animation going
+      	 update();
+			
+		 } // main()
+		  
+		 function init(){
 			 
 			 // set the width and height of the canvas
 			 canvas.width = 400;
 			 canvas.height = 400;
 			 
-		 };
+			 // initialise vars
+		 
+			 var gravity = 0.1;
+
+			 // initialise ball
+
+			 ball.radius = 10;
+			 ball.position.x = canvas.width / 2;
+			 ball.position.y = canvas.height ;
+			 ball.velocity.x = 2;
+			 ball.velocity.y = 5;
+			 ball.acceleration = gravity;
+			 
+		 } // init()
+		 
+		 // A function to repeat every time the animation loops.
+		function update() {
+
+			// clear the canvas so the object can be redrawn
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// draws the ball
+			ball.draw();
+			
+			blueRect.draw();
+			
+			// add velocity to ball
+			ball.position.x -= ball.velocity.x;
+			ball.position.y -= ball.velocity.y;
+
+			// adds gravity (acceleration)
+			//ball.velocity.y += ball.acceleration;
+
+			// if ball reaches bottom of the canvas, bounce back
+			if(ball.position.y >= canvas.height - ball.radius){
+
+				// stops the ball from leaving canvas
+				ball.position.y = canvas.height - ball.radius;
+
+				// makes the ball bounce back
+				ball.velocity.y = -ball.velocity.y;
+
+			} // if
+
+			// if the ball reaches the top of the canvas, bounce back
+			if(ball.position.y <= 0 + ball.radius){
+
+				// stops the ball from leaving canvas
+				ball.position.y = 0 + ball.radius;
+
+				// makes the ball bounce back
+				ball.velocity.y = -ball.velocity.y;
+
+			} // if
+
+			// if ball reaches right side of the canvas, bounce back
+			if(ball.position.x >= canvas.width - ball.radius){
+
+				// stops the ball from leaving canvas
+				ball.position.x = canvas.width - ball.radius;
+
+				// makes the ball bounce back
+				ball.velocity.x = - ball.velocity.x;
+
+			} // if
+
+			// if ball reaches left side of the canvas, bounce back
+			if(ball.position.x <= 0 + ball.radius){
+
+				// stops the ball from leaving canvas
+				ball.position.x = 0 + ball.radius;
+
+				// makes the ball bounce back
+				ball.velocity.x = - ball.velocity.x;
+
+			} // if
+			
+			if(checkIfInGrid(ball.position.x, ball.position.y, 
+								  blueRect.position.x, blueRect.position.y,
+								 blueRect.width, blueRect.height)){
+				blueRect.isAlive = false;
+				
+			} // if
+
+			window.requestAnimationFrame(update);
+
+		} // update()
+		 
+		 function checkIfInGrid(ballX, ballY, gridX, gridY, gridWidth, gridHeight){
+			 
+			 var isInGrid = false;
+			 
+			 // checks to see if point clicked is in the specified grid square
+			 if(ballX > gridX && ballX < (gridX + gridWidth)
+				&& ballY > gridY && ballY < (gridY + gridHeight)){
+				 
+				 isInGrid = true;
+			 } else {
+				 
+				 isInGrid = false;
+			 }  // if
+			 
+			 return isInGrid;
+		 }; // checkIfInGrid()
+		 
+		 
+		 /////////////////// run code /////////////////////
+		 
+		 main();
 
     </script>
 
