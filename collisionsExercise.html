@@ -67,7 +67,7 @@
 			 	} // if
 				 
 			 }; // draw()
-		 };
+		 }; // Rectanle Object
 		 
 		 
 		 // Gets a handle to the element with id canvasOne.
@@ -79,6 +79,19 @@
 		 // Creating new rectangle object
 		 var blueRect = new Rectangle();
 		 
+		 // Variables
+		 
+		 var gravity = 0.1;
+			 
+		 var blocks = [];
+		 
+		 var time = performance || Date;
+		 
+		 var curTime = 0;
+		 var lastTime = 0;
+		 var deltaTime = 0;
+		 
+		 
 		 
 		 ///////////////////////////// Functions  /////////////////////////////////////
 		 
@@ -86,6 +99,21 @@
 			 
 			 // initialise canvas
 			 init();
+			 
+			 // set up blocks
+			 for(var i = 0; i < 10; i++){
+				 
+				 for(var j = 0; j < 4; j++){
+					 
+					 var blueRect = new Rectangle();
+					 
+					 blueRect.position.x = 50 * i;
+					 blueRect.position.y = 30 * j;
+					 blocks.push(blueRect);
+					 
+				 } // for
+				
+			 } // for
 			 
 			 // get the animation going
       	 update();
@@ -97,36 +125,44 @@
 			 // set the width and height of the canvas
 			 canvas.width = 400;
 			 canvas.height = 400;
-			 
-			 // initialise vars
-		 
-			 var gravity = 0.1;
 
 			 // initialise ball
 
 			 ball.radius = 10;
 			 ball.position.x = canvas.width / 2;
-			 ball.position.y = canvas.height ;
-			 ball.velocity.x = 2;
-			 ball.velocity.y = 5;
+			 ball.position.y = canvas.height + 5;
+			 ball.velocity.x = 100;
+			 ball.velocity.y = 130;
 			 ball.acceleration = gravity;
 			 
 		 } // init()
 		 
 		 // A function to repeat every time the animation loops.
-		function update() {
-
+		function update(timestamp) {
+			
+			// save the current time	
+			curTime = timestamp || time.now();
+			
+			// calculate delta time
+			deltaTime = (curTime - lastTime) / 1000;
+			
 			// clear the canvas so the object can be redrawn
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 			// draws the ball
 			ball.draw();
 			
-			blueRect.draw();
+			for(var i = 0; i < blocks.length; i++){
+				
+				if(blocks[i].isAlive)
+					blocks[i].draw();
+				
+			} // for
 			
 			// add velocity to ball
-			ball.position.x -= ball.velocity.x;
-			ball.position.y -= ball.velocity.y;
+			ball.position.x -= ball.velocity.x * deltaTime;
+			ball.position.y -= ball.velocity.y * deltaTime;
+			
 
 			// adds gravity (acceleration)
 			//ball.velocity.y += ball.acceleration;
@@ -175,12 +211,26 @@
 
 			} // if
 			
-			if(checkIfInGrid(ball.position.x, ball.position.y, 
-								  blueRect.position.x, blueRect.position.y,
-								 blueRect.width, blueRect.height)){
-				blueRect.isAlive = false;
+			for(var i = 0; i < blocks.length; i++){
+			
+				// check to see if rectangle is alive and if the ball has entered it
+				if(blocks[i].isAlive && checkIfInGrid(ball.position.x, ball.position.y, 
+									  blocks[i].position.x, blocks[i].position.y,
+									 blocks[i].width, blocks[i].height)){
+
+					// destroy block
+					blocks[i].isAlive = false;
+
+					// bounce off block
+					ball.velocity.y = -ball.velocity.y;
+
+				} // if
 				
-			} // if
+				
+			} // for
+			
+			// save the last time
+			lastTime = timestamp || time.now();
 
 			window.requestAnimationFrame(update);
 
